@@ -1,0 +1,54 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using MySql.Data.MySqlClient;
+
+namespace DisplayTable
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            MySqlConnection mycon = new MySqlConnection("server=localhost; User Id=root; database=employee");
+            using (mycon)
+            {
+                MySqlCommand cmd = new MySqlCommand("SELECT ProductID, ProductName, UnitPrice FROM product", mycon);
+                mycon.Open();
+                using (MySqlDataReader mrdr = cmd.ExecuteReader())
+                {
+                    DataTable product = new DataTable();
+                    product.Columns.Add("PID");
+                    product.Columns.Add("PName");
+                    product.Columns.Add("UPrice");
+                    product.Columns.Add("Discount");
+                    while (mrdr.Read())
+                    {
+                        DataRow drow = product.NewRow();
+                        double productPrice = Convert.ToDouble(mrdr["UnitPrice"]);
+                        double discount = productPrice * 0.9;
+                        drow["PID"] = mrdr["ProductId"];
+                        drow["PName"] = mrdr["ProductName"];
+                        drow["UPrice"] = mrdr["UnitPrice"];
+                        drow["Discount"] = discount;
+                        product.Rows.Add(drow);
+                    }
+
+                    dataGridView1.DataSource = product;
+                    //dataGridView1.DataBind();
+                }
+            }
+        }
+    }
+}
